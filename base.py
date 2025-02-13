@@ -23,6 +23,8 @@ snake_speed = 15
 
 # define font
 font_style = pygame.font.SysFont(None, 50)
+# (V.2) define the font of the score board
+score_font = pygame.font.SysFont(None, 35)
 
 # define the player snake function that draws the snake on the screen
 def player_snake(snake_block, snake_list):
@@ -33,6 +35,11 @@ def player_snake(snake_block, snake_list):
 def message(msg, color):
     mesg = font_style.render(msg, True, color)
     display.blit(mesg, [dis_width / 6, dis_height / 3])
+
+# (V.2) define the score function
+def show_score(score):
+    value = score_font.render("Score: " + str(score), True, white)
+    display.blit(value, [0, 0])
 
 # define the main game function
 def gameLoop():
@@ -59,6 +66,9 @@ def gameLoop():
     foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
     foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
 
+    # (V.2) initialize the score as a value of 0
+    score = 0
+    
     while not game_over:
 
         # when the player lost the game
@@ -67,6 +77,8 @@ def gameLoop():
             display.fill(black)
             # display a message asking for player input
             message("You lost! Press Q-Quit or C-Play Again", white)
+            # (V.2) show the score
+            show_score(score)
             # display the message
             pygame.display.update()
 
@@ -136,6 +148,8 @@ def gameLoop():
 
         # draws the snake
         player_snake(snake_block, snake_List)
+        # (V.2) show the score
+        show_score(score)
 
         # update the display
         pygame.display.update()
@@ -145,6 +159,8 @@ def gameLoop():
             foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
             foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
             Length_of_snake += 1
+            # (V.2) add points to the player's score
+            score += 100
 
         clock.tick(snake_speed)
 
