@@ -11,8 +11,6 @@ black = (0, 0, 0)
 # define display dimensions
 dis_width = 800
 dis_height = 600
-# (V.2) reserve area for the score display
-score_height = 50 
 
 # create the display
 display = pygame.display.set_mode((dis_width, dis_height))
@@ -52,8 +50,8 @@ def gameLoop():
 
     # set the x1 variable as half of the screen width
     x1 = dis_width / 2
-    # set the y1 variable as half of the screen height (V.2) account for the score space
-    y1 = (dis_height + score_height) / 2
+    # set the y1 variable as half of the screen height
+    y1 = dis_height / 2
 
     # set the change of x1 and y1 as 0
     x1_change = 0
@@ -66,8 +64,7 @@ def gameLoop():
 
     # set the position of the food at a random position in the screen
     foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-    # (V.2) take account of the score area, prevent snake on appearing there
-    foody = round(random.randrange(score_height, dis_height - snake_block) / 10.0) * 10.0
+    foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
 
     # (V.2) initialize the score as a value of 0
     score = 0
@@ -125,7 +122,7 @@ def gameLoop():
                     x1_change = 0
 
         # if the snake hits the screen edge
-        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < score_height:
+        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
             # set the game_close variable as True prompting if the player wants to play again
             game_close = True
         
@@ -160,8 +157,7 @@ def gameLoop():
         # if the snake eats the food, randomize the next location of the food, increase the length of the snake body
         if x1 == foodx and y1 == foody:
             foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-            # (V.2) take account of score area, prevent food from appearing there
-            foody = round(random.randrange(score_height, dis_height - snake_block) / 10.0) * 10.0
+            foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
             Length_of_snake += 1
             # (V.2) add points to the player's score
             score += 100
@@ -174,10 +170,3 @@ def gameLoop():
 
 # calls the gameLoop function to start the game
 gameLoop()
-
-
-"""
-Issues Risen
-- After including the score safe area, the game is not operating correctly as when the snake reaches the food
-  it does not eat the food and grows.
-"""
