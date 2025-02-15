@@ -9,8 +9,9 @@ white = (255, 255, 255)
 black = (0, 0, 0)
 
 # define display dimensions
-dis_width = 800
+dis_width = 600
 dis_height = 600
+score_height = 50
 
 # create the display
 display = pygame.display.set_mode((dis_width, dis_height))
@@ -19,10 +20,10 @@ pygame.display.set_caption('Snake Game')
 # define clock
 clock = pygame.time.Clock()
 snake_block = 10
-snake_speed = 15
+snake_speed = 25
 
 # define font
-font_style = pygame.font.SysFont(None, 50)
+font_style = pygame.font.SysFont(None, 40)
 # (V.2) define the font of the score board
 score_font = pygame.font.SysFont(None, 35)
 
@@ -51,7 +52,7 @@ def gameLoop():
     # set the x1 variable as half of the screen width
     x1 = dis_width / 2
     # set the y1 variable as half of the screen height
-    y1 = dis_height / 2
+    y1 = (dis_height + score_height) / 2
 
     # set the change of x1 and y1 as 0
     x1_change = 0
@@ -64,7 +65,7 @@ def gameLoop():
 
     # set the position of the food at a random position in the screen
     foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-    foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
+    foody = round(random.randrange(score_height, dis_height - snake_block) / 10.0) * 10.0
 
     # (V.2) initialize the score as a value of 0
     score = 0
@@ -122,12 +123,16 @@ def gameLoop():
                     x1_change = 0
 
         # if the snake hits the screen edge
-        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
+        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < score_height:
             # set the game_close variable as True prompting if the player wants to play again
             game_close = True
         
         x1 += x1_change
         y1 += y1_change
+
+        x1 = round(x1 / 10.0) * 10.0
+        y1 = round(y1 / 10.0) * 10.0
+
         # fill the screen background as black
         display.fill(black)
         # set the snake and food as white
@@ -155,9 +160,9 @@ def gameLoop():
         pygame.display.update()
 
         # if the snake eats the food, randomize the next location of the food, increase the length of the snake body
-        if x1 == foodx and y1 == foody:
+        if abs(x1 - foodx) < snake_block and abs(y1 - foody) < snake_block:
             foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-            foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
+            foody = round(random.randrange(score_height, dis_height - snake_block) / 10.0) * 10.0
             Length_of_snake += 1
             # (V.2) add points to the player's score
             score += 100
@@ -170,3 +175,20 @@ def gameLoop():
 
 # calls the gameLoop function to start the game
 gameLoop()
+
+"""
+Issues Risen
+- After including the score safe area, the game is not operating correctly as when the snake reaches the food
+  it does not eat the food and grows.
+
+  > fixed by changing the if statement of the snake growth and food randomization, to use the absolute value
+    of the difference between the location of the snake and the food.
+
+- A visual bug is present when moving the snake horizontally to get the food. The snake appears to eat the food 
+  at either a position above or below the food position. Getting food vertically is fine, just horizontally the
+  visual is off. Was initially unsure if the issue is with the food or the snake.
+
+  > Attempted to fix the bug for the food, through ensuring that the food is positioned in multiples of 10,
+    however, the issue was not resolved. Decided to change the positioning of the snake movement to multiples
+    of 10. This fixed the visual bug.
+"""
