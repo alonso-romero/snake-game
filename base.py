@@ -6,6 +6,7 @@ pygame.init()
 
 # define colors
 white = (255, 255, 255)
+gray = (137, 137, 137)
 black = (0, 0, 0)
 
 # define display dimensions
@@ -41,6 +42,68 @@ def message(msg, color):
 def show_score(score):
     value = score_font.render("Score: " + str(score), True, white)
     display.blit(value, [0, 0])
+
+def button(msg, x, y, w, h, ic, ac, action=None):
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+
+    # border
+    border_thickness = 2
+    pygame.draw.rect(display, white, (x - border_thickness, y - border_thickness, w + 2 * border_thickness, h + 2 * border_thickness))
+
+    if x + w > mouse[0] > x and y + h > mouse[1] > y:
+        pygame.draw.rect(display, ac, (x, y, w, h))
+        if click[0] == 1 and action != None:
+            if action == "resume":
+                return True
+            elif action == "restart":
+                gameLoop()
+            elif action == "quit":
+                pygame.quit()
+                quit()
+
+    else:
+        pygame.draw.rect(display, ic, (x, y, w, h))
+
+    smallText = pygame.font.SysFont(None, 20)
+    textSurf = smallText.render(msg, True, white)
+    display.blit(textSurf, (x + (w // 2 - textSurf.get_width() // 2), y + (h // 2 - textSurf.get_height() // 2)))
+
+# (V.2) define a pause function
+def pause_game():
+    paused = True
+    # setting the background of the pause screen to transparent
+    overlay = pygame.Surface((dis_width, dis_height), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 128))
+
+    while paused:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    paused = False
+                #elif event.key == pygame.K_q:
+                    #pygame.quit()
+                    #quit()
+                #elif event.key == pygame.K_c:
+                    #gameLoop()
+
+        display.blit(overlay, (0, 0))
+        message("Paused", white)
+
+        # Draw the buttons
+        if button("Resume", 150, 400, 100, 50, black, gray, action="resume"):
+            paused = False
+        if button("Restart", 300, 400, 100, 50, black, gray, action="restart"):
+            gameLoop()
+        if button("Quit", 450, 400, 100, 50, black, gray, action="quit"):
+            pygame.quit()
+            quit()
+
+        pygame.display.update()
+        clock.tick(15)
 
 # define the main game function
 def gameLoop():
@@ -121,6 +184,9 @@ def gameLoop():
                 elif event.key == pygame.K_DOWN:
                     y1_change = snake_block
                     x1_change = 0
+                # (V.2) if the player presses ESC, pause the game
+                elif event.key == pygame.K_ESCAPE:
+                    pause_game()
 
         # if the snake hits the screen edge
         if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < score_height:
