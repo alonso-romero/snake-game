@@ -61,14 +61,7 @@ def button(msg, x, y, w, h, ic, ac, action=None):
     if x + w > mouse[0] > x and y + h > mouse[1] > y:
         pygame.draw.rect(display, ac, (x, y, w, h))
         if click[0] == 1 and action != None:
-            if action == "resume":
-                return True
-            elif action == "restart":
-                gameLoop()
-            elif action == "quit":
-                pygame.quit()
-                quit()
-
+            return action
     else:
         pygame.draw.rect(display, ic, (x, y, w, h))
 
@@ -76,7 +69,38 @@ def button(msg, x, y, w, h, ic, ac, action=None):
     textSurf = smallText.render(msg, True, white)
     display.blit(textSurf, (x + (w // 2 - textSurf.get_width() // 2), y + (h // 2 - textSurf.get_height() // 2)))
 
-    return False
+    return None
+
+# (V.2.1) define a main menu function
+def main_menu():
+    menu = True
+
+    while menu:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        display.fill(black)
+        message("Snake Game", white, y_offset=-175)
+
+        # draw the buttons and check actions
+        action = button("Solo Game", dis_width // 2, dis_height // 2, 150, 50, black, gray, action="solo")
+        if not action:
+            action = button("Versus", dis_width // 2, dis_height // 2 + 70, 150, 50, black, gray, action='versus')
+        if not action:
+            action = button("Settings", dis_width // 2, dis_height // 2 + 140, 150, 50, black, gray, action='settings')
+
+        # perform actions based on button click
+        if action == 'solo':
+            gameLoop()
+        elif action == "versus":
+            pass
+        elif action == "settings":
+            pass
+
+        pygame.display.update()
+        clock.tick(15)
 
 # (V.2) define a pause function
 def pause_game():
@@ -103,11 +127,18 @@ def pause_game():
         message("Paused", white, y_offset = -100)
 
         # Draw the buttons
-        if button("Resume", 150, 400, 100, 50, black, gray, action="resume"):
-            paused = False
-        if button("Restart", 300, 400, 100, 50, black, gray, action="restart"):
+        action = button("Resume", 150, 400, 100, 50, black, gray, action="resume")
+        if not action:
+            action = button("Restart", 300, 400, 100, 50, black, gray, action="restart")
+        if not action:
+            action = button("Quit", 450, 400, 100, 50, black, gray, action="quit")
+
+        # perform actions based on button click
+        if action == 'resume':
+            return True
+        elif action == 'restart':
             gameLoop()
-        if button("Quit", 450, 400, 100, 50, black, gray, action="quit"):
+        elif action == 'quit':
             pygame.quit()
             quit()
 
@@ -252,7 +283,7 @@ def gameLoop():
     quit()
 
 # calls the gameLoop function to start the game
-gameLoop()
+main_menu()
 
 """
 Issues Risen
