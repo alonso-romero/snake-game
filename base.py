@@ -98,15 +98,11 @@ def pause_game():
         message("Paused", white)
 
         # Draw the buttons
-        resume_button = button("Resume", dis_width // 2, dis_height // 2 + 50, 100, 50, black, gray, action="resume")
-        restart_button = button("Restart", dis_width // 2, dis_height // 2 + 110, 100, 50, black, gray, action="restart")
-        quit_button = button("Quit", dis_width // 2, dis_height // 2 + 170, 100, 50, black, gray, action="quit")
-
-        if resume_button:
+        if button("Resume", dis_width // 2, dis_height // 2 + 50, 100, 50, black, gray, action="resume"):
             paused = False
-        if restart_button:
+        if button("Restart", dis_width // 2, dis_height // 2 + 110, 100, 50, black, gray, action="restart"):
             gameLoop()
-        if quit_button:
+        if button("Quit", dis_width // 2, dis_height // 2 + 170, 100, 50, black, gray, action="quit"):
             pygame.quit()
             quit()
 
