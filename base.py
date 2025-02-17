@@ -36,7 +36,8 @@ def player_snake(snake_block, snake_list):
 # define the message function, which displays a message onto the screen
 def message(msg, color):
     mesg = font_style.render(msg, True, color)
-    display.blit(mesg, [dis_width / 6, dis_height / 3])
+    mesg_rect = mesg.get_rect(center=(dis_width // 2, dis_height // 2))
+    display.blit(mesg, mesg_rect)
 
 # (V.2) define the score function
 def show_score(score):
@@ -46,6 +47,12 @@ def show_score(score):
 def button(msg, x, y, w, h, ic, ac, action=None):
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
+
+    center_x = x
+    center_y = y
+
+    x = center_x - w // 2
+    y = center_y - h // 2
 
     # border
     border_thickness = 2
