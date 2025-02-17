@@ -34,9 +34,9 @@ def player_snake(snake_block, snake_list):
         pygame.draw.rect(display, white, [x[0], x[1], snake_block, snake_block])
 
 # define the message function, which displays a message onto the screen
-def message(msg, color):
+def message(msg, color, y_offset=0):
     mesg = font_style.render(msg, True, color)
-    mesg_rect = mesg.get_rect(center=(dis_width // 2, dis_height // 2))
+    mesg_rect = mesg.get_rect(center=(dis_width // 2, (dis_height - score_height) // 2 + score_height + y_offset))
     display.blit(mesg, mesg_rect)
 
 # (V.2) define the score function
@@ -49,7 +49,7 @@ def button(msg, x, y, w, h, ic, ac, action=None):
     click = pygame.mouse.get_pressed()
 
     center_x = x
-    center_y = y
+    center_y = y - score_height // 2
 
     x = center_x - w // 2
     y = center_y - h // 2
@@ -76,6 +76,8 @@ def button(msg, x, y, w, h, ic, ac, action=None):
     textSurf = smallText.render(msg, True, white)
     display.blit(textSurf, (x + (w // 2 - textSurf.get_width() // 2), y + (h // 2 - textSurf.get_height() // 2)))
 
+    return False
+
 # (V.2) define a pause function
 def pause_game():
     paused = True
@@ -98,7 +100,7 @@ def pause_game():
                     #gameLoop()
 
         display.blit(overlay, (0, 0))
-        message("Paused", white)
+        message("Paused", white, y_offset = -100)
 
         # Draw the buttons
         if button("Resume", 150, 400, 100, 50, black, gray, action="resume"):
@@ -133,9 +135,12 @@ def gameLoop():
     # initially set the length of the snake body as 1
     Length_of_snake = 1
 
+    # added padding for food placement
+    padding = snake_block * 2
+
     # set the position of the food at a random position in the screen
-    foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-    foody = round(random.randrange(score_height, dis_height - snake_block) / 10.0) * 10.0
+    foodx = round(random.randrange(padding, dis_width - snake_block - padding) / 10.0) * 10.0
+    foody = round(random.randrange(score_height + padding, dis_height - snake_block - padding) / 10.0) * 10.0
 
     # (V.2) initialize the score as a value of 0
     score = 0
@@ -234,8 +239,8 @@ def gameLoop():
 
         # if the snake eats the food, randomize the next location of the food, increase the length of the snake body
         if abs(x1 - foodx) < snake_block and abs(y1 - foody) < snake_block:
-            foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-            foody = round(random.randrange(score_height, dis_height - snake_block) / 10.0) * 10.0
+            foodx = round(random.randrange(padding, dis_width - snake_block - padding) / 10.0) * 10.0
+            foody = round(random.randrange(score_height + padding, dis_height - snake_block - padding) / 10.0) * 10.0
             Length_of_snake += 1
             # (V.2) add points to the player's score
             score += 100
