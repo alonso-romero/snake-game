@@ -36,8 +36,7 @@ def player_snake(snake_block, snake_list):
 # define the message function, which displays a message onto the screen
 def message(msg, color):
     mesg = font_style.render(msg, True, color)
-    mesg_rect = mesg.get_rect(center=(dis_width // 2, dis_height // 2))
-    display.blit(mesg, mesg_rect)
+    display.blit(mesg, [dis_width / 6, dis_height / 3])
 
 # (V.2) define the score function
 def show_score(score):
@@ -46,13 +45,7 @@ def show_score(score):
 
 def button(msg, x, y, w, h, ic, ac, action=None):
     mouse = pygame.mouse.get_pos()
-    click = pygame.mouse.get_pressed
-    
-    center_x = x
-    center_y = y
-
-    x = center_x - w // 2
-    y = center_y - h // 2
+    click = pygame.mouse.get_pressed()
 
     # border
     border_thickness = 2
@@ -79,6 +72,9 @@ def button(msg, x, y, w, h, ic, ac, action=None):
 # (V.2) define a pause function
 def pause_game():
     paused = True
+    # setting the background of the pause screen to transparent
+    overlay = pygame.Surface((dis_width, dis_height), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 128))
 
     while paused:
         for event in pygame.event.get():
@@ -94,15 +90,15 @@ def pause_game():
                 #elif event.key == pygame.K_c:
                     #gameLoop()
 
-        display.fill(black)
+        display.blit(overlay, (0, 0))
         message("Paused", white)
 
         # Draw the buttons
-        if button("Resume", dis_width // 2, dis_height // 2 + 50, 100, 50, black, gray, action="resume"):
+        if button("Resume", 150, 400, 100, 50, black, gray, action="resume"):
             paused = False
-        if button("Restart", dis_width // 2, dis_height // 2 + 110, 100, 50, black, gray, action="restart"):
+        if button("Restart", 300, 400, 100, 50, black, gray, action="restart"):
             gameLoop()
-        if button("Quit", dis_width // 2, dis_height // 2 + 170, 100, 50, black, gray, action="quit"):
+        if button("Quit", 450, 400, 100, 50, black, gray, action="quit"):
             pygame.quit()
             quit()
 
