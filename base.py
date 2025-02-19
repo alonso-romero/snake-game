@@ -90,6 +90,8 @@ def main_menu():
             action = button("Versus", dis_width // 2, dis_height // 2 + 70, 150, 50, black, gray, action='versus')
         if not action:
             action = button("Settings", dis_width // 2, dis_height // 2 + 140, 150, 50, black, gray, action='settings')
+        if not action:
+            action = button("Quit Game", dis_width // 2, dis_height // 2 + 210, 150, 50, black, gray, action='quit')
 
         # perform actions based on button click
         if action == 'solo':
@@ -98,6 +100,9 @@ def main_menu():
             pass
         elif action == "settings":
             pass
+        elif action == "quit":
+            pygame.quit()
+            quit()
 
         pygame.display.update()
         clock.tick(15)
@@ -131,16 +136,15 @@ def pause_game():
         if not action:
             action = button("Restart", 300, 400, 100, 50, black, gray, action="restart")
         if not action:
-            action = button("Quit", 450, 400, 100, 50, black, gray, action="quit")
+            action = button("Main Menu", 450, 400, 100, 50, black, gray, action="menu")
 
         # perform actions based on button click
         if action == 'resume':
             return True
         elif action == 'restart':
             gameLoop()
-        elif action == 'quit':
-            pygame.quit()
-            quit()
+        elif action == 'menu':
+            main_menu()
 
         pygame.display.update()
         clock.tick(15)
