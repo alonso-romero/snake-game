@@ -1,5 +1,6 @@
 import pygame
 import random
+from collections import deque
 
 # initialize pygame
 pygame.init()
@@ -33,6 +34,11 @@ def player_snake(snake_block, snake_list):
     for x in snake_list:
         pygame.draw.rect(display, white, [x[0], x[1], snake_block, snake_block])
 
+# Draw the AI snake
+def ai_snake(snake_block, snake_list):
+    for x in snake_list:
+        pygame.draw.rect(display, gray, [x[0], x[1], snake_block, snake_block])
+
 # define the message function, which displays a message onto the screen
 def message(msg, color, y_offset=0):
     mesg = font_style.render(msg, True, color)
@@ -40,9 +46,9 @@ def message(msg, color, y_offset=0):
     display.blit(mesg, mesg_rect)
 
 # (V.2) define the score function
-def show_score(score):
-    value = score_font.render("Score: " + str(score), True, white)
-    display.blit(value, [0, 0])
+def show_score(score, x=0, y=0, color=white):
+    value = score_font.render("Score: " + str(score), True, color)
+    display.blit(value, [x, y])
 
 def button(msg, x, y, w, h, ic, ac, action=None):
     mouse = pygame.mouse.get_pos()
@@ -71,6 +77,28 @@ def button(msg, x, y, w, h, ic, ac, action=None):
 
     return None
 
+# BFS path finding for AI snake
+def find_path(start, goal, walls, block, max_x, max_y):
+    sx, sy = start[0] // block, start[1] // block
+    gx, gy = goal[0] // block, goal[1] // block
+    visited = set(walls)
+    queue = deque([((sx, sy), [])])
+    visited.add((sx, sy))
+    directions = [((1,0), 'RIGHT'), ((-1,0), 'LEFT'), ((0,1), 'DOWN'), ((0,-1), 'UP')]
+
+    while queue:
+        (x, y), path = queue.popleft()
+        if (x, y) == (gx, gy):
+            return path
+
+        for (dx, dy), direction in directions:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < max_x and 0 <= ny < max_y and (nx, ny) not in visited:
+                visited.add((nx, ny))
+                queue.append(((nx, ny), path + [direction]))
+
+    return []
+
 # (V.2.1) define a main menu function
 def main_menu():
     menu = True
@@ -97,7 +125,7 @@ def main_menu():
         if action == 'solo':
             gameLoop()
         elif action == "versus":
-            pass
+            versusLoop()
         elif action == "settings":
             pass
         elif action == "quit":
@@ -285,6 +313,142 @@ def gameLoop():
     # quits the game
     pygame.quit()
     quit()
+
+# (V.2) define the versus game function
+def versusLoop():
+        game_over = False
+        game_close = False
+    
+        # initial player
+        x1 = dis_width / 2
+        y1 = (dis_height + score_height) / 2
+        x1_change = 0
+        y1_change = 0
+        snake_List = []
+        Length_of_snake = 1
+        player_score = 0
+    
+        # initial AI
+        ai_x = dis_width / 4
+        ai_y = (dis_height + score_height) / 2
+        ai_x_change = 0
+        ai_y_change = 0
+        ai_snake_list = []
+        ai_length = 1
+        ai_score = 0
+    
+        # place food
+        padding = snake_block*2
+        foodx = round(random.randrange(padding, dis_width - padding - snake_block)/10.0)*10.0
+        foody = round(random.randrange(score_height + padding, dis_height - padding - snake_block)/10.0)*10.0
+
+        while not game_over:
+            while game_close:
+                display.fill(black)
+                message("Game Over! Press Q to quit or C to restart", white)
+                show_score(player_score, 0, 0)
+                show_score(ai_score, dis_width-150, 0, gray)
+                pygame.display.update()
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_q:
+                            pygame.quit()
+                            quit()
+                        if event.key == pygame.K_c:
+                            versusLoop()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    game_over = True
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        x1_change, y1_change = -snake_block, 0
+                    elif event.key == pygame.K_RIGHT:
+                        x1_change, y1_change = snake_block, 0
+                    elif event.key == pygame.K_UP:
+                        x1_change, y1_change = 0, -snake_block
+                    elif event.key == pygame.K_DOWN:
+                        x1_change, y1_change = 0, snake_block
+            # move player
+            x1 += x1_change
+            y1 += y1_change
+            x1 = round(x1/10.0)*10.0
+            y1 = round(y1/10.0)*10.0
+
+            # check player boundaries
+            if (x1 < 0 or x1 >= dis_width or
+                y1 < score_height or y1 >= dis_height):
+                game_close = True
+        
+            # move AI via BFS
+            obstacles = {(seg[0]//snake_block, seg[1]//snake_block) for seg in snake_List + ai_snake_list}
+            path = find_path((ai_x, ai_y), (foodx, foody), obstacles, snake_block, dis_width//snake_block, (dis_height-score_height)//snake_block)
+        
+            if path:
+                move = path[0]
+                if move=='RIGHT': ai_x_change, ai_y_change = snake_block, 0
+                elif move=='LEFT': ai_x_change, ai_y_change = -snake_block, 0
+                elif move=='DOWN': ai_x_change, ai_y_change = 0, snake_block
+                elif move=='UP': ai_x_change, ai_y_change = 0, -snake_block
+            ai_x += ai_x_change
+            ai_y += ai_y_change
+            ai_x = round(ai_x/10.0)*10.0
+            ai_y = round(ai_y/10.0)*10.0
+
+            # check AI boundaries
+            if (ai_x < 0 or ai_x >= dis_width or
+                ai_y < score_height or ai_y >= dis_height):
+                game_close = True
+        
+            # draw
+            display.fill(black)
+            pygame.draw.rect(display, white, [foodx, foody, snake_block, snake_block])
+        
+            # player snake list
+            snake_Head = [x1, y1]
+            snake_List.append(snake_Head)
+            if len(snake_List)>Length_of_snake: del snake_List[0]
+        
+            # ai snake list
+            ai_head = [ai_x, ai_y]
+            ai_snake_list.append(ai_head)
+            if len(ai_snake_list)>ai_length: del ai_snake_list[0]
+        
+            # collisions
+            for seg in snake_List[:-1]:
+                if seg==snake_Head: game_close=True
+            for seg in ai_snake_list[:-1]:
+                if seg==ai_head: game_close=True
+
+            # cross-snake collisions
+            for seg in snake_List:
+                if seg == ai_head:
+                    game_close = True
+            
+            for seg in ai_snake_list:
+                if seg == snake_Head:
+                    game_close = True
+        
+            # draw snakes & scores
+            player_snake(snake_block, snake_List)
+            ai_snake(snake_block, ai_snake_list)
+            show_score(player_score, 0, 0)
+            show_score(ai_score, dis_width-150, 0, gray)
+            pygame.display.update()
+        
+            # player eats
+            if abs(x1-foodx)<snake_block and abs(y1-foody)<snake_block:
+                Length_of_snake+=1; player_score+=100
+                foodx = round(random.randrange(padding, dis_width-padding-snake_block)/10.0)*10.0
+                foody = round(random.randrange(score_height+padding, dis_height-padding-snake_block)/10.0)*10.0
+        
+            # ai eats
+            if abs(ai_x-foodx)<snake_block and abs(ai_y-foody)<snake_block:
+                ai_length+=1; ai_score+=100
+                foodx = round(random.randrange(padding, dis_width-padding-snake_block)/10.0)*10.0
+                foody = round(random.randrange(score_height+padding, dis_height-padding-snake_block)/10.0)*10.0
+            clock.tick(snake_speed)
+        pygame.quit()
+        quit()
 
 # calls the gameLoop function to start the game
 main_menu()
